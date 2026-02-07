@@ -2,44 +2,40 @@
 
 Fine-tuned RoBERTa model for classifying NYC building code violations by category (8 classes) and severity (3 levels).
 
-
 **See it in action:** [Live Demo](https://construction-code-violation-detector-bert-bkvmmvsnynas4vdk9dic.streamlit.app/)
 
 **Fine-Tuned Model (ViolationBERT):** [HuggingFace](https://huggingface.co/Rohan1103/ViolationBERT)
 
 ## Results
+
 | Task | Macro F1 | Accuracy |
 |---|---|---|
 | Category | 0.8977 | 0.9620 |
 | Severity | 0.8637 | 0.8685 |
 
 ## Project Structure
-
 ```
 building-violation-detector/
-├── 00_download_data.py          # Download NYC DOB data via API
-├── 01_Dataset_Preparation.py    # Clean, label, split, tokenize
-├── 02_Model_Training.py         # RoBERTa fine-tuning + hyperparameter search
-├── 03_Evaluation.py             # Test evaluation, error analysis, inference
+├── app/                             # Streamlit deployment files
+├── checkpoints/                     # Model checkpoints (final_model.pt)
 ├── data/
-│   ├── raw/                     # Raw CSVs from API
-│   ├── processed/               # Cleaned data + tokenized datasets
-│   └── splits/                  # train.csv, val.csv, test.csv
-├── checkpoints/                 # Model checkpoints
-├── figures/                     # All generated plots
-├── results/                     # JSON results files
-├── logs/                        # Training logs
-├── requirements.txt
-├── README.md
-└── documentation.md             # Full writeup
+│   ├── raw/                         # Raw CSVs from API
+│   ├── processed/                   # Cleaned data + tokenized datasets
+│   └── splits/                      # train.csv, val.csv, test.csv
+├── figures/                         # All generated plots
+├── logs/                            # Training logs
+├── results/                         # JSON results files
+├── data prep and training.ipynb     # Download + Dataset Prep + Model Training
+├── evaluation.ipynb                 # Evaluation + Error Analysis + Inference
+├── readme.md
+└── requirements.txt
 ```
 
 ## Setup
-
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/building-violation-detector.git
-cd building-violation-detector
+git clone https://github.com/Rohan-Prabhakar/Code-Violation-Detector-BERT-.git
+cd Code-Violation-Detector-BERT-
 
 # Create environment
 python -m venv venv
@@ -51,30 +47,27 @@ pip install -r requirements.txt
 
 ## Usage
 
-Run the scripts in order:
+Run the notebooks in order:
+```
+1. data prep and training.ipynb   # Downloads data, preprocesses, trains model (requires GPU)
+2. evaluation.ipynb               # Evaluates on test set, error analysis, inference demo
+```
 
+For the Streamlit demo:
 ```bash
-# Step 1: Download data from NYC Open Data API
-python 00_download_data.py
-
-# Step 2: Preprocess, clean, split, and tokenize
-python 01_Dataset_Preparation.py
-
-# Step 3: Train model (requires GPU)
-python 02_Model_Training.py
-
-# Step 4: Evaluate on test set + run inference demo
-python 03_Evaluation.py
+pip install streamlit
+streamlit run app/app.py
 ```
 
 ## Quick Inference
-
 ```python
 from transformers import AutoModel, AutoTokenizer
+from huggingface_hub import hf_hub_download
 import torch
 
-# Load model (see 03_Evaluation.py for full ViolationClassifier class)
-ckpt = torch.load('checkpoints/final_model.pt', map_location='cpu')
+# Download model from HuggingFace
+model_path = hf_hub_download(repo_id="Rohan1103/ViolationBERT", filename="final_model.pt")
+ckpt = torch.load(model_path, map_location='cpu')
 
 # Predict
 text = "FAILURE TO MAINTAIN BUILDING WALL BRICKS FALLING FROM FACADE"
