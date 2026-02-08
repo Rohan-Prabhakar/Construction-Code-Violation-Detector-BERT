@@ -2,40 +2,43 @@
 
 Fine-tuned RoBERTa model for classifying NYC building code violations by category (8 classes) and severity (3 levels).
 
-**See it in action:** [Live Demo](https://construction-code-violation-detector-bert-bkvmmvsnynas4vdk9dic.streamlit.app/)
-
-**Fine-Tuned Model (ViolationBERT):** [HuggingFace](https://huggingface.co/Rohan1103/ViolationBERT)
-
 ## Results
 
-| Task | Macro F1 | Accuracy |
-|---|---|---|
-| Category | 0.8977 | 0.9620 |
-| Severity | 0.8637 | 0.8685 |
+### Three-Way Comparison
+
+| Model | Category F1 | Severity F1 | Combined F1 |
+|---|---|---|---|
+| Random Baseline | 0.0046 | 0.1530 | 0.0788 |
+| Zero-Shot (BART-MNLI, 400M) | 0.2334 | 0.3277 | 0.2805 |
+| **ViolationBERT (Ours, 125M)** | **0.8977** | **0.8637** | **0.8807** |
+
+A 400M parameter generic model loses to our 125M fine-tuned model, proving domain adaptation is necessary for construction NLP.
 
 ## Project Structure
+
 ```
 building-violation-detector/
-├── app/                             # Streamlit deployment files
-├── checkpoints/                     # Model checkpoints (final_model.pt)
+├── app/                         # Streamlit deployment files
+├── checkpoints/                 # Model checkpoints (final_model.pt)
 ├── data/
-│   ├── raw/                         # Raw CSVs from API
-│   ├── processed/                   # Cleaned data + tokenized datasets
-│   └── splits/                      # train.csv, val.csv, test.csv
-├── figures/                         # All generated plots
-├── logs/                            # Training logs
-├── results/                         # JSON results files
-├── data prep and training.ipynb     # Download + Dataset Prep + Model Training
-├── evaluation.ipynb                 # Evaluation + Error Analysis + Inference
+│   ├── raw/                     # Raw CSVs from API
+│   ├── processed/               # Cleaned data + tokenized datasets
+│   └── splits/                  # train.csv, val.csv, test.csv
+├── figures/                     # All generated plots
+├── logs/                        # Training logs
+├── results/                     # JSON results files
+├── data prep and training.ipynb # 00 Download + 01 Dataset Prep + 02 Training
+├── evaluation.ipynb             # 03 Evaluation + Error Analysis + Inference
 ├── readme.md
 └── requirements.txt
 ```
 
 ## Setup
+
 ```bash
 # Clone the repo
-git clone https://github.com/Rohan-Prabhakar/Code-Violation-Detector-BERT-.git
-cd Code-Violation-Detector-BERT-
+git clone https://github.com/yourusername/building-violation-detector.git
+cd building-violation-detector
 
 # Create environment
 python -m venv venv
@@ -48,8 +51,9 @@ pip install -r requirements.txt
 ## Usage
 
 Run the notebooks in order:
+
 ```
-1. data prep and training.ipynb   # Downloads data, preprocesses, trains model (requires GPU)
+1. data prep and training.ipynb   # Downloads data, preprocesses, trains model
 2. evaluation.ipynb               # Evaluates on test set, error analysis, inference demo
 ```
 
@@ -60,14 +64,13 @@ streamlit run app/app.py
 ```
 
 ## Quick Inference
+
 ```python
 from transformers import AutoModel, AutoTokenizer
-from huggingface_hub import hf_hub_download
 import torch
 
-# Download model from HuggingFace
-model_path = hf_hub_download(repo_id="Rohan1103/ViolationBERT", filename="final_model.pt")
-ckpt = torch.load(model_path, map_location='cpu')
+# Load model (see 03_Evaluation.py for full ViolationClassifier class)
+ckpt = torch.load('checkpoints/final_model.pt', map_location='cpu')
 
 # Predict
 text = "FAILURE TO MAINTAIN BUILDING WALL BRICKS FALLING FROM FACADE"
